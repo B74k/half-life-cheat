@@ -4,8 +4,8 @@
 
 static int to_screen(vec3_t world, vec2_t out) {
     vec2_t n;
-    if (!g_pEngine || !g_pEngine->pTriAPI) return 0;
-    if (g_pEngine->pTriAPI->WorldToScreen(world, n)) return 0;
+    if (!g_engine || !g_engine->pTriAPI) return 0;
+    if (g_engine->pTriAPI->WorldToScreen(world, n)) return 0;
     if (n[0] < -1 || n[0] > 1 || n[1] < -1 || n[1] > 1) return 0;
     if (g_screen.iWidth <= 0 || g_screen.iHeight <= 0) return 0;
     out[0] = (n[0] + 1) * g_screen.iWidth / 2;
@@ -32,7 +32,7 @@ static const char* npc_name(const char* m) {
 }
 
 void esp_draw(void) {
-    if (!g_pEngine || !g_pEngine->GetLocalPlayer()) return;
+    if (!g_engine || !g_engine->GetLocalPlayer()) return;
 
     int count = hl25_get_entity_count();
     if (count <= 0 || count > 512) count = 512;
@@ -56,8 +56,8 @@ void esp_draw(void) {
         if (!to_screen(pos, scr)) continue;
 
         int tw, th;
-        g_pEngine->pfnDrawSetTextColor(0.7f, 1.0f, 1.0f);
-        g_pEngine->pfnDrawConsoleStringLen((char*)name, &tw, &th);
-        g_pEngine->pfnDrawConsoleString((int)scr[0] - tw/2, (int)scr[1], (char*)name);
+        g_engine->pfnDrawSetTextColor(0.7f, 1.0f, 1.0f);
+        g_engine->pfnDrawConsoleStringLen((char*)name, &tw, &th);
+        g_engine->pfnDrawConsoleString((int)scr[0] - tw/2, (int)scr[1], (char*)name);
     }
 }

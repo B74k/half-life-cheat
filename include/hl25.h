@@ -75,7 +75,7 @@ static inline int hl25_entity_is_alive(cl_entity_t* ent) {
 }
 
 static inline cl_entity_t* hl25_get_entity(int index) {
-    return (g_pEngine && g_pEngine->GetEntityByIndex) ? g_pEngine->GetEntityByIndex(index) : NULL;
+    return (g_engine && g_engine->GetEntityByIndex) ? g_engine->GetEntityByIndex(index) : NULL;
 }
 
 #endif

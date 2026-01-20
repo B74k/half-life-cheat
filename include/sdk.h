@@ -286,9 +286,9 @@ typedef struct {
     void* (*pClientFactory)(void);
 } cldll_func_t;
 
-extern cl_enginefunc_t* g_pEngine;
-extern cldll_func_t* g_pClient;
-extern playermove_t* g_pPlayerMove;
+extern cl_enginefunc_t* g_engine;
+extern cldll_func_t* g_client;
+extern playermove_t* g_player_move;
 extern SCREENINFO g_screen;
 
 #endif
