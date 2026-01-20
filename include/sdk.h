@@ -287,7 +287,6 @@ typedef struct {
 } cldll_func_t;
 
 extern cl_enginefunc_t* g_engine;
-extern cldll_func_t* g_client;
 extern playermove_t* g_player_move;
 extern SCREENINFO g_screen;
 

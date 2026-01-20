@@ -9,7 +9,6 @@ void bhop_tick(usercmd_t*);
 void esp_draw(void);
 
 cl_enginefunc_t* g_engine;
-cldll_func_t* g_client;
 playermove_t* g_player_move;
 SCREENINFO g_screen;
 hl25_addresses_t g_hl25_addresses;
@@ -37,63 +36,52 @@ static void __cdecl hook_playermove(playermove_t* pm, int server) {
 }
 
 static void install_hooks(void) {
-    module_info_t hw, cl;
+    module_info_t hw;
     DWORD old;
-    static cldll_func_t funcs;
     void* m;
 
     if (!memory_get_module("hw.dll", &hw) && !memory_get_module("sw.dll", &hw)) return;
-    if (!memory_get_module("client.dll", &cl)) return;
-
-    void (*F)(cldll_func_t*) = (void(*)(cldll_func_t*))GetProcAddress((HMODULE)cl.base, "F");
-    if (!F) return;
-    F(&funcs);
-    g_client = &funcs;
+    if (!g_hl25_addresses.p_client_funcs) return;
 
     m = memory_find_pattern(&hw, "6A 07 68 ?? ?? ?? ?? FF 15");
-    if (m) { void* e = *(void**)((char*)m + 3); if ((size_t)e > 0x10000000) g_engine = e; }
-
-    if (g_engine) { g_screen.iSize = sizeof(g_screen); g_engine->pfnGetScreenInfo(&g_screen); }
-
-    orig_create_move = funcs.pCL_CreateMoveFunc;
-    orig_redraw = funcs.pHudRedrawFunc;
-    orig_player_move = funcs.pClientMove;
-
-    if (g_hl25_addresses.p_client_funcs) {
-        void** t = g_hl25_addresses.p_client_funcs;
-        if (VirtualProtect(t, 0xAC, PAGE_EXECUTE_READWRITE, &old)) {
-            t[CLDLL_OFFSET_CL_CREATEMOVE/4] = hook_createmove;
-            t[CLDLL_OFFSET_HUD_REDRAW/4] = hook_redraw;
-            t[CLDLL_OFFSET_CLIENTMOVE/4] = hook_playermove;
-            VirtualProtect(t, 0xAC, old, &old);
-            return;
-        }
+    if (m) {
+        void* e = *(void**)((char*)m + 3);
+        if ((size_t)e > 0x10000000) g_engine = e;
     }
-    funcs.pCL_CreateMoveFunc = hook_createmove;
-    funcs.pHudRedrawFunc = hook_redraw;
-    funcs.pClientMove = hook_playermove;
+
+    if (g_engine) {
+        g_screen.iSize = sizeof(g_screen);
+        g_engine->pfnGetScreenInfo(&g_screen);
+    }
+
+    void** t = g_hl25_addresses.p_client_funcs;
+    orig_create_move = (CL_CreateMove_t)t[CLDLL_OFFSET_CL_CREATEMOVE/4];
+    orig_redraw = (HUD_Redraw_t)t[CLDLL_OFFSET_HUD_REDRAW/4];
+    orig_player_move = (HUD_PlayerMove_t)t[CLDLL_OFFSET_CLIENTMOVE/4];
+
+    if (VirtualProtect(t, 0xAC, PAGE_EXECUTE_READWRITE, &old)) {
+        t[CLDLL_OFFSET_CL_CREATEMOVE/4] = hook_createmove;
+        t[CLDLL_OFFSET_HUD_REDRAW/4] = hook_redraw;
+        t[CLDLL_OFFSET_CLIENTMOVE/4] = hook_playermove;
+        VirtualProtect(t, 0xAC, old, &old);
+    }
 }
 
 static void restore_hooks(void) {
     DWORD old;
-    if (g_hl25_addresses.p_client_funcs) {
-        void** t = g_hl25_addresses.p_client_funcs;
-        if (VirtualProtect(t, 0xAC, PAGE_EXECUTE_READWRITE, &old)) {
-            if (orig_create_move) t[CLDLL_OFFSET_CL_CREATEMOVE/4] = orig_create_move;
-            if (orig_redraw) t[CLDLL_OFFSET_HUD_REDRAW/4] = orig_redraw;
-            if (orig_player_move) t[CLDLL_OFFSET_CLIENTMOVE/4] = orig_player_move;
-            VirtualProtect(t, 0xAC, old, &old);
-        }
-    }
-    if (g_client) {
-        if (orig_create_move) g_client->pCL_CreateMoveFunc = orig_create_move;
-        if (orig_redraw) g_client->pHudRedrawFunc = orig_redraw;
-        if (orig_player_move) g_client->pClientMove = orig_player_move;
+    if (!g_hl25_addresses.p_client_funcs) return;
+    void** t = g_hl25_addresses.p_client_funcs;
+    if (VirtualProtect(t, 0xAC, PAGE_EXECUTE_READWRITE, &old)) {
+        if (orig_create_move) t[CLDLL_OFFSET_CL_CREATEMOVE/4] = orig_create_move;
+        if (orig_redraw) t[CLDLL_OFFSET_HUD_REDRAW/4] = orig_redraw;
+        if (orig_player_move) t[CLDLL_OFFSET_CLIENTMOVE/4] = orig_player_move;
+        VirtualProtect(t, 0xAC, old, &old);
     }
 }
 
 static DWORD WINAPI init_thread(LPVOID p) {
-    (void)p; Sleep(2000);
+    (void)p;
+    Sleep(2000);
     hl25_init_addresses();
     install_hooks();
     return 0;

@@ -14,6 +14,7 @@ static int to_screen(vec3_t world, vec2_t out) {
 }
 
 static const char* npc_name(const char* m) {
+    // Half-Life
     if (strstr(m, "scientist")) return "Scientist";
     if (strstr(m, "barney")) return "Barney";
     if (strstr(m, "hgrunt")) return "H.Grunt";
@@ -28,6 +29,29 @@ static const char* npc_name(const char* m) {
     if (strstr(m, "controller")) return "Controller";
     if (strstr(m, "turret")) return "Turret";
     if (strstr(m, "sentry")) return "Sentry";
+    if (strstr(m, "gman")) return "G-Man";
+    if (strstr(m, "apache")) return "Apache";
+    if (strstr(m, "tentacle")) return "Tentacle";
+    if (strstr(m, "nihilanth")) return "Nihilanth";
+    if (strstr(m, "ichthyosaur")) return "Ichthyosaur";
+    if (strstr(m, "leech")) return "Leech";
+    // Opposing Force
+    if (strstr(m, "pitdrone")) return "Pit Drone";
+    if (strstr(m, "shocktrooper") || strstr(m, "strooper")) return "Shock Trooper";
+    if (strstr(m, "voltigore")) return "Voltigore";
+    if (strstr(m, "gonome")) return "Gonome";
+    if (strstr(m, "massn")) return "Black Ops";
+    if (strstr(m, "fassn")) return "Assassin";
+    if (strstr(m, "rgrunt")) return "Robot Grunt";
+    if (strstr(m, "pitworm")) return "Pit Worm";
+    if (strstr(m, "geneworm")) return "Gene Worm";
+    if (strstr(m, "shockroach")) return "Shock Roach";
+    if (strstr(m, "babygarg")) return "Baby Garg";
+    if (strstr(m, "penguin")) return "Penguin";
+    // Blue Shift / Shared
+    if (strstr(m, "otis")) return "Otis";
+    if (strstr(m, "rosenberg")) return "Rosenberg";
+    if (strstr(m, "chumtoad")) return "Chumtoad";
     return NULL;
 }
 
